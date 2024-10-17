@@ -1,0 +1,147 @@
+custom:
+  devAccountType: nonprod
+  config: ${file(./deploy-configs/${self:custom.${opt:stage}AccountType}/${opt:stage}/config.yml)}
+
+service: ${self:custom.config.serviceName}
+  
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: ${self:custom.config.runtime}
+  stage: ${self:custom.config.environment, "dev"}
+  region: ${self:custom.config.region}
+  stackName: ${self:custom.config.appOwner}-${self:custom.config.environment}-${self:custom.config.serviceName}-npm-serverless
+  memorySize: ${self:custom.config.memorySize}
+  timeout: ${self:custom.config.timeout}
+  logRetentionInDays: ${self:custom.config.logRetentionInDays}
+  deploymentPrefix: serverless
+  architecture: ${self:custom.config.architecture}
+  #stack-tags to be created
+  stackTags:
+    AppName: ${self:custom.config.appName}
+    AppOwner: ${self:custom.config.appOwner}
+    CreatedByEmail: ${self:custom.config.createdByEmail}
+    Environment: ${self:custom.config.environment}
+  #function-tags to be created
+  tags:
+    AppName: ${self:custom.config.appName}
+    AppOwner: ${self:custom.config.appOwner}
+    CreatedByEmail: ${self:custom.config.createdByEmail}
+    Environment: ${self:custom.config.environment}
+  #S3 bucket  
+  deploymentBucket:
+    name: ${self:custom.config.deploymentBucketName}
+    serverSideEncryption: AES256
+  #service wide environment variables
+  environment: ${file(./deploy-configs/${self:custom.${opt:stage}AccountType}/${opt:stage}/env.yml)}
+  # iam:
+  #   role: ${self:custom.config.iamrole}
+  # iamRoleStatements:
+  #   - Effect: "Allow"
+  #     Action:
+  #       - ssm:getParameters
+  #       - s3:CreateBucket
+  #       - s3:ListBucket
+  #       - s3:PutObject
+  #       - s3:GetObject
+  #     Resource: "*"
+  iam:
+   role:
+     statements:
+       - Effect: "Allow"
+         Action:
+              - ssm:getParameters
+              - s3:CreateBucket
+              - s3:ListBucket
+              - s3:PutObject
+              - s3:GetObject
+         Resource: "*"
+         
+  httpApi:
+    id: ${self:custom.config.restApiId}  
+
+
+frameworkVersion: "3"
+plugins:
+  - serverless-plugin-ifelse
+
+resources:
+  Resources:
+    foodAppCustomerRole:
+      # rds db read - cloudwatch logs - ssm parameter store - certificate manager - secret manager
+      Type: AWS::IAM::Role
+      Properties:
+        #1. RDS Read + SSM + Cloudwatch Logs
+        RoleName: ${self:custom.config.serviceName}-lambda-exec-role
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:custom.config.serviceName}-lambda-exec-role-po-dbr-ssm-acm
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                #RDS
+                - Effect: Allow
+                  Action:
+                    - rds:DescribeDBInstances
+                    - rds:DescribeDBClusters
+                    - rds:DescribeDBClusterEndpoints
+                    - rds:DescribeDBClusterSnapshots
+                    - rds:DescribeDBSnapshotAttributes
+                    - rds:DescribeDBEngineVersions
+                    - rds:ListTagsForResource
+                    - rds-db:connect
+                    - rds-data:ExecuteStatement
+                  Resource: "*"
+                #cloudwatch
+                - Effect: Allow
+                  Action:
+                    - logs:PutLogEvents
+                    - logs:CreateLogStream
+                    - logs:CreateLogGroup
+                  Resource: "arn:aws:logs:*:*:*"
+                #ssm params
+                - Effect: Allow
+                  Action:
+                    - ssm:GetParameters
+                    - ssm:GetParametersByPath
+                  Resource: "arn:aws:ssm:*:${self:custom.config.accountId}:parameter/*"
+                - Effect: Allow
+                  Action:
+                    - acm:GetCertificate
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:CreateNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                    - ec2:DescribeInstances
+                    - ec2:AttachNetworkInterface
+                  Resource: "*"
+
+functions:
+  hello-service:
+    handler: dist/hello-service.hello
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /hello
+          method: get
+
+  goodbye-service:
+    handler: dist/goodbye-service.goodbye
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /goodbye
+          method: get
