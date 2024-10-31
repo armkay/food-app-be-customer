@@ -114,6 +114,10 @@ resources:
                   Resource: "arn:aws:ssm:*:${self:custom.config.accountId}:parameter/*"
                 - Effect: Allow
                   Action:
+                    - secretsmanager:GetSecretValue
+                  Resource: ${self:custom.config.SecretArn}
+                - Effect: Allow
+                  Action:
                     - acm:GetCertificate
                   Resource: "*"
                 - Effect: Allow
@@ -123,14 +127,17 @@ resources:
                     - ec2:DeleteNetworkInterface
                     - ec2:DescribeInstances
                     - ec2:AttachNetworkInterface
+                    - ec2:DescribeSubnets
+                    - ec2:DescribeSecurityGroups
+                    - ec2:DescribeVpcPeeringConnections
+                    - ec2:DescribeDhcpOptions
+                    - ec2:DescribeVpcs
                   Resource: "*"
 
 functions:
   hello-service:
     handler: dist/hello-service.hello
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
+    role: foodAppCustomerRole
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /hello
@@ -138,6 +145,7 @@ functions:
 
   goodbye-service:
     handler: dist/goodbye-service.goodbye
+    role: foodAppCustomerRole
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /goodbye
@@ -145,6 +153,7 @@ functions:
 
   create-cart-service:
     handler: dist/cart-service.createCart
+    role: foodAppCustomerRole
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /create-cart

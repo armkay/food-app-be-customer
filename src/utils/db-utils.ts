@@ -3,7 +3,6 @@ import {
   SecretsManager,
 } from "@aws-sdk/client-secrets-manager";
 import { AppConfig } from "../config/app-config";
-import { commonErrors } from "../constants/food-app-constans";
 import { Pool } from "pg";
 
 export interface IDbConnection {
@@ -29,14 +28,17 @@ export class DbConnection implements IDbConnection {
   private readonly ssl: any;
 
   private constructor() {
+    console.log(`begin Secret ${JSON.stringify(this.secretName)}`);
     this.secretsManager = new SecretsManager({ region: AppConfig.region });
     this.secretName = AppConfig.secret_name;
+    console.log(`got here ${JSON.stringify(this.secretName)}`);
   }
 
   // Create instance if it doesn't already exist
   public static getInstance(): IDbConnection {
     if (!DbConnection.instance) {
       DbConnection.instance = new DbConnection();
+      console.log(`db connection ${JSON.stringify(DbConnection.instance)}`);
     }
     return DbConnection.instance;
   }
@@ -87,9 +89,11 @@ export class DbConnection implements IDbConnection {
     let secret: GetSecretValueCommandOutput;
     // try getting Secrets from secret manager
     try {
+      console.log(`Getting secret`);
       secret = await this.secretsManager.getSecretValue({
         SecretId: this.secretName,
       });
+      console.log(`Got secret ${JSON.stringify(secret)}`);
       const { username, password, host, port } = JSON.parse(
         secret.SecretString
       );

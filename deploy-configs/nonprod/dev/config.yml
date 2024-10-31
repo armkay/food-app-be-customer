@@ -24,3 +24,5 @@ restApiId: puwttty3ne
 restApiRootResourceId: wc4kas1
 
 authorizerId: rp4l4a
+
+SecretArn: arn:aws:secretsmanager:ca-central-1:202533542038:secret:dev/food-app-db-secret-0mQr2A

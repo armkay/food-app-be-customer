@@ -9,6 +9,7 @@ export async function createCart(
   const dal = new CartDal();
   let responseDal: string;
 
+  console.log(`made it into Lambda`);
   responseDal = await dal.creatCartAnonymousUser();
 
   return {
