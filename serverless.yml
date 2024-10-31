@@ -32,6 +32,7 @@ provider:
   deploymentBucket:
     name: ${self:custom.config.deploymentBucketName}
     serverSideEncryption: AES256
+  vpc: ${file(./deploy-configs/${self:custom.${opt:stage}AccountType}/${opt:stage}/vpc.yml)}
   #service wide environment variables
   environment: ${file(./deploy-configs/${self:custom.${opt:stage}AccountType}/${opt:stage}/env.yml)}
   # iam:
@@ -157,4 +158,12 @@ functions:
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /create-cart
+          method: get
+
+  get-cust-id:
+    handler: dist/customer-service.getCustomerId
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /retrieve-cust-id
           method: get

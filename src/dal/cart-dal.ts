@@ -13,7 +13,7 @@ export class CartDal {
    * @param queryParams Query params from the url. Must include namcId. Can also include
    * currentPage and numOfElement for pagination
    */
-  public creatCartAnonymousUser(): Promise<string> {
+  public createCartAnonymousUser(): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
       try {
         const sqlParams: any[] = [];
@@ -22,6 +22,30 @@ export class CartDal {
         const dbResult = await this.dbConn.executeSql(
           sql,
           dbConst.DATABASE_NAME
+        );
+        resolve(`Cart Created ${dbResult}`);
+      } catch (e) {
+        console.error(e);
+        reject(e);
+      }
+    });
+  }
+
+  /**
+   * Method to fetch the rows for the get Counter Info Screen
+   * @param queryParams Query params from the url. Must include namcId. Can also include
+   * currentPage and numOfElement for pagination
+   */
+  public createCustomerCart(customerId: string): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
+      try {
+        const sqlParams: any[] = [customerId];
+        let sql: string = `${sqlStatements.cartService.CREATE_CUSTOMER_CART}`;
+        console.log(`SQL statement:  ${sql}`);
+        const dbResult = await this.dbConn.executeSql(
+          sql,
+          dbConst.DATABASE_NAME,
+          sqlParams
         );
         resolve(`Cart Created ${dbResult}`);
       } catch (e) {

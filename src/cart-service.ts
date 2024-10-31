@@ -9,8 +9,13 @@ export async function createCart(
   const dal = new CartDal();
   let responseDal: string;
 
-  console.log(`made it into Lambda`);
-  responseDal = await dal.creatCartAnonymousUser();
+  const queryParams = event?.queryStringParameters;
+
+  if (!queryParams.customerId) {
+    responseDal = await dal.createCartAnonymousUser();
+  } else {
+    responseDal = await dal.createCustomerCart(queryParams.customerId);
+  }
 
   return {
     statusCode: 200,

@@ -14,5 +14,9 @@ export const commonErrors = {
 export const sqlStatements = {
   cartService: {
     CREATE_ANONYMOUS_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (cart_status) VALUES ('active');`,
+    CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, cart_status) VALUES ($1,'active');`,
+  },
+  customerService: {
+    GET_CUSTOMER_ID: `SELECT id FROM ${dbConst.CUSTOMERS_TABLE} WHERE name = $1`,
   },
 };
