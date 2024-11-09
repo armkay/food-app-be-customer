@@ -10,8 +10,9 @@ export async function createCart(
   let responseDal: string;
 
   const queryParams = event?.queryStringParameters;
-
+  console.log(`Query Params : ${JSON.stringify(event)}`);
   if (!queryParams.customerId) {
+    console.log(`Create anonymous cart`);
     responseDal = await dal.createCartAnonymousUser();
   } else {
     responseDal = await dal.createCustomerCart(queryParams.customerId);

@@ -10,7 +10,14 @@ export async function getCustomerId(
   const dal = new CustomerDal();
   let responseDal: string;
 
-  const queryParams = event?.queryStringParameters;
+  const queryParams = event.queryStringParameters;
+
+  if (queryParams) {
+    console.log(`queryParams defined`);
+  } else {
+    console.log(`query params not defined`);
+  }
+
   console.log(`${JSON.stringify(queryParams)}`);
   if (!queryParams.user_name) {
     return common_error(`Failed to Retrieve ID for customer`, 500);

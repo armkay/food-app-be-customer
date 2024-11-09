@@ -167,3 +167,11 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /retrieve-cust-id
           method: get
+
+  get-products:
+    handler: dist/product-service.getProducts
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /get-products
+          method: get

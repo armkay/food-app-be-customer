@@ -14,7 +14,8 @@
     "lint": "tslint \"src/**/*.ts\" --force",
     "local": "npm run build && serverless invoke local -s dev -p events/test-event.json -f hello-service ",
     "local-anonym-cart": "npm run build && serverless invoke local -s dev -p events/test-event.json -f create-cart-service ",
-    "local-get-cust-id": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-cust-id "
+    "local-get-cust-id": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-cust-id ",
+    "local-get-products": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-products "
   },
   "repository": {
     "type": "git",

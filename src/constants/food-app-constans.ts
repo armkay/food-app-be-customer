@@ -5,6 +5,7 @@ export const dbConst = {
   DATABASE_NAME: AppConfig.database_name,
   CARTS_TABLE: "carts",
   CUSTOMERS_TABLE: "customers",
+  PRODUCTS_TABLE: "products",
 };
 
 export const commonErrors = {
@@ -17,6 +18,9 @@ export const sqlStatements = {
     CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, cart_status) VALUES ($1,'active');`,
   },
   customerService: {
-    GET_CUSTOMER_ID: `SELECT id FROM ${dbConst.CUSTOMERS_TABLE} WHERE name = $1`,
+    GET_CUSTOMER_ID: `SELECT id FROM ${dbConst.CUSTOMERS_TABLE} WHERE name = $1;`,
+  },
+  productService: {
+    GET_ALL_PRODUCTS: `SELECT product_id, product_name, price, description, stock_quantity FROM ${dbConst.PRODUCTS_TABLE};`,
   },
 };
