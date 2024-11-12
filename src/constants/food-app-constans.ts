@@ -14,13 +14,20 @@ export const commonErrors = {
 
 export const sqlStatements = {
   cartService: {
-    CREATE_ANONYMOUS_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (cart_status) VALUES ('active');`,
-    CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, cart_status) VALUES ($1,'active');`,
+    CREATE_ANONYMOUS_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (status) VALUES ('active') RETURNING cart_id;`,
+    CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, status) VALUES ($1,'active');`,
+    GET_CUSTOMER_CART: `SELECT cart_id from ${dbConst.CARTS_TABLE} WHERE customer_id = $1;`,
   },
   customerService: {
     GET_CUSTOMER_ID: `SELECT id FROM ${dbConst.CUSTOMERS_TABLE} WHERE name = $1;`,
+    GET_CUSTOMER_BY_ID: `SELECT customer_id, customer_name, email, created_at, cognito_sub, updated_at FROM ${dbConst.CUSTOMERS_TABLE} WHERE cognito_sub=$1;`,
+    CREATE_CUSTOMER:
+      `INSERT INTO customers (customer_name, cognito_sub, email) ` +
+      `VALUES ($1, $2, $3) ` +
+      `ON CONFLICT (email) DO NOTHING ` +
+      `RETURNING customer_id;`,
   },
   productService: {
-    GET_ALL_PRODUCTS: `SELECT product_id, product_name, price, description, stock_quantity FROM ${dbConst.PRODUCTS_TABLE};`,
+    GET_ALL_PRODUCTS: `SELECT product_id, name, price, description FROM ${dbConst.PRODUCTS_TABLE};`,
   },
 };

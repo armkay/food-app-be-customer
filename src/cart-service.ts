@@ -1,5 +1,10 @@
 import { Callback, Context } from "aws-lambda";
 import { CartDal } from "./dal/cart-dal";
+import {
+  getCartIdForSession,
+  validateSessionToken,
+  createSessionCartMapping,
+} from "./utils/session-manager";
 
 export async function createCart(
   event: any,
@@ -7,21 +12,93 @@ export async function createCart(
   _callback: Callback
 ): Promise<any> {
   const dal = new CartDal();
+  const queryParams = event?.queryStringParameters;
   let responseDal: string;
+
+  try {
+    // Step 1: Validate the session token
+    const sessionToken = validateSessionToken(event.headers);
+
+    // Step 2: Check if an existing cart ID is associated with the session token
+    const existingCartId = await getCartIdForSession(sessionToken);
+
+    if (existingCartId) {
+      console.log(`Existing cart found for session token: ${sessionToken}`);
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ cartId: existingCartId }),
+      };
+    }
+
+    console.log(
+      `Query Params : ${JSON.stringify(event.queryStringParameters)}`
+    );
+
+    // Step 3: Create a new cart (anonymous or customer)
+    const cartId = queryParams?.customerId
+      ? await createCustomerCart(queryParams.customerId, dal)
+      : await createAnonymousCart(sessionToken, dal);
+
+    return {
+      statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      isBase64Encoded: false,
+      body: JSON.stringify({ cartId }),
+    };
+  } catch (error) {
+    console.error("Error processing cart creation:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal Server Error" }),
+    };
+  }
+}
+
+async function createAnonymousCart(
+  sessionToken: string,
+  dal: CartDal
+): Promise<string> {
+  const newCartId = await dal.createCartAnonymousCart();
+  await createSessionCartMapping(sessionToken, newCartId);
+  console.log(`Anonymous cart created with ID: ${JSON.stringify(newCartId)}`);
+  return newCartId;
+}
+
+async function createCustomerCart(
+  customerId: string,
+  dal: CartDal
+): Promise<string> {
+  const newCartId = await dal.createCustomerCart(customerId);
+  console.log(
+    `Customer cart created with ID: ${newCartId} for customerId: ${customerId}`
+  );
+  return newCartId;
+}
+
+export async function getCustomerCart(
+  event: any,
+  _context: Context,
+  _callback: Callback
+): Promise<any> {
+  const dal = new CartDal();
+  let responseDal: any;
+  let custId: string;
 
   const queryParams = event?.queryStringParameters;
   console.log(`Query Params : ${JSON.stringify(event)}`);
-  if (!queryParams.customerId) {
-    console.log(`Create anonymous cart`);
-    responseDal = await dal.createCartAnonymousUser();
+  if (queryParams.cust_id) {
+    custId = queryParams.cust_id;
+    console.log(`GET CART for USER: ${custId}`);
+    responseDal = await dal.getCustomerCart(custId);
   } else {
-    responseDal = await dal.createCustomerCart(queryParams.customerId);
+    console.log(`No Cart`);
+    responseDal = { cust_id: custId, cart_id: "NO CART" };
   }
 
   return {
     statusCode: 200,
     headers: { "Access-Control-Allow-Origin": "*" },
     isBase64Encoded: false,
-    body: `${responseDal}`,
+    body: `${JSON.stringify(responseDal)}`,
   };
 }

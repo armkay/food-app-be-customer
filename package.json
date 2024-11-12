@@ -15,7 +15,10 @@
     "local": "npm run build && serverless invoke local -s dev -p events/test-event.json -f hello-service ",
     "local-anonym-cart": "npm run build && serverless invoke local -s dev -p events/test-event.json -f create-cart-service ",
     "local-get-cust-id": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-cust-id ",
-    "local-get-products": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-products "
+    "local-get-products": "npm run build && serverless invoke local -s dev -p events/get-customer-id-event.json -f get-products ",
+    "local-get-cust-cart": "npm run build && serverless invoke local -s dev -p events/get-customer-cart-event.json -f get-customer-cart ",
+    "local-get-customer-by-id": "npm run build && serverless invoke local -s dev -p events/get-customer-by-id-event.json -f get-customer-by-id ",
+    "local-create-customer": "npm run build && serverless invoke local -s dev -p events/create-customer-event.json -f create-customer "
   },
   "repository": {
     "type": "git",
@@ -45,6 +48,7 @@
   "dependencies": {
     "@aws-amplify/ui-angular": "^5.0.29",
     "@aws-sdk/client-acm": "^3.670.0",
+    "@aws-sdk/client-dynamodb": "^3.687.0",
     "@aws-sdk/client-lambda": "^3.670.0",
     "@aws-sdk/client-rds-data": "^3.670.0",
     "@aws-sdk/client-s3": "^3.673.0",
@@ -53,6 +57,7 @@
     "@babel/traverse": "^7.25.7",
     "aws-amplify": "^6.6.5",
     "node-fetch": "^3.3.2",
-    "pg": "^8.13.0"
+    "pg": "^8.13.0",
+    "uuid": "^11.0.2"
   }
 }

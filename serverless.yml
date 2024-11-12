@@ -68,6 +68,40 @@ plugins:
 
 resources:
   Resources:
+    SessionCartMappingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMO_SESSION_TABLE}
+        AttributeDefinitions:
+          - AttributeName: session_token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: session_token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage}
+
+    CartLogTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.DYNAMO_LOG_TABLE}
+        AttributeDefinitions:
+          - AttributeName: log_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: log_id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        SSESpecification:
+          SSEEnabled: true    
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage} 
+
     foodAppCustomerRole:
       # rds db read - cloudwatch logs - ssm parameter store - certificate manager - secret manager
       Type: AWS::IAM::Role
@@ -135,6 +169,7 @@ resources:
                     - ec2:DescribeVpcs
                   Resource: "*"
 
+                     
 functions:
   hello-service:
     handler: dist/hello-service.hello
@@ -175,3 +210,27 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /get-products
           method: get
+
+  get-customer-cart:
+    handler: dist/cart-service.getCustomerCart
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /get-customer-cart
+          method: get
+
+  get-customer-by-id:
+    handler: dist/customer-service.retrieveCustomerById
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /get-customer-by-id
+          method: get       
+
+  create-customer:
+    handler: dist/customer-service.createCustomer
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /create-customer
+          method: post    

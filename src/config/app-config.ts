@@ -8,4 +8,5 @@ export const AppConfig = {
   database_name: process.env.DATABASE_NAME,
   log_group_name: "",
   log_stream_name: "",
+  DYNAMO_TABLE_NAME: process.env.DYNAMO_SESSION_TABLE,
 };

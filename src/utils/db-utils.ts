@@ -28,17 +28,14 @@ export class DbConnection implements IDbConnection {
   private readonly ssl: any;
 
   private constructor() {
-    console.log(`begin Secret ${JSON.stringify(this.secretName)}`);
     this.secretsManager = new SecretsManager({ region: AppConfig.region });
     this.secretName = AppConfig.secret_name;
-    console.log(`got here ${JSON.stringify(this.secretName)}`);
   }
 
   // Create instance if it doesn't already exist
   public static getInstance(): IDbConnection {
     if (!DbConnection.instance) {
       DbConnection.instance = new DbConnection();
-      console.log(`db connection ${JSON.stringify(DbConnection.instance)}`);
     }
     return DbConnection.instance;
   }
@@ -55,7 +52,6 @@ export class DbConnection implements IDbConnection {
     params?: any[]
   ): Promise<any[]> {
     if (database) {
-      console.log(`DATABASE : ${database}`);
       this.database = database;
     }
     if (
@@ -93,7 +89,6 @@ export class DbConnection implements IDbConnection {
       secret = await this.secretsManager.getSecretValue({
         SecretId: this.secretName,
       });
-      console.log(`Got secret ${JSON.stringify(secret)}`);
       const { username, password, host, port } = JSON.parse(
         secret.SecretString
       );
