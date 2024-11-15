@@ -62,16 +62,13 @@ export async function createCustomer(
     if (!postBody) {
       return common_error("Error in Event Body");
     }
-    console.log(postBody.cognito_sub);
-
-    console.log(`Request Body: ${JSON.stringify(postBody)}`);
 
     // Use try/catch instead of .then() and .catch()
     responseDal = await dal.createCustomer(postBody);
     if (responseDal) {
-      return common_success(JSON.stringify(responseDal));
+      return common_success(responseDal);
     } else {
-      throw `Customer Not Created`;
+      throw new Error(`Customer Not Created`);
     }
   } catch (error) {
     console.error("Error processing customer creation:", error);
