@@ -5,7 +5,7 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import { AppConfig } from "../config/app-config";
 
-const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
+const ddbClient = new DynamoDBClient({ region: AppConfig.region });
 const CARTS_TABLE = AppConfig.DYNAMO_TABLE_NAME;
 
 /**
@@ -14,7 +14,9 @@ const CARTS_TABLE = AppConfig.DYNAMO_TABLE_NAME;
  * @returns The session token if it exists, otherwise throws an error.
  */
 export function validateSessionToken(headers: any): string {
-  const sessionToken = headers["x-session-token"];
+  const sessionToken = headers;
+  console.log(`Session Token :: ${JSON.stringify(headers)}`);
+  console.log(`CARTS TABLE :: ${CARTS_TABLE}`);
   if (!sessionToken) {
     throw new Error("Missing session token");
   }
@@ -29,13 +31,17 @@ export function validateSessionToken(headers: any): string {
 export async function getCartIdForSession(
   sessionToken: string
 ): Promise<string | null> {
+  console.log(`GETTING CART ID for the Session`);
   const getParams = {
     TableName: CARTS_TABLE,
     Key: { session_token: { S: sessionToken } },
   };
+  console.log(`GOT PARAMS :: ${JSON.stringify(getParams)}`);
 
   try {
+    console.log(`Calling dbbClient`);
     const existingCart = await ddbClient.send(new GetItemCommand(getParams));
+    console.log(`Existing Cart ${existingCart}`);
     if (existingCart?.Item?.cart_id?.S) {
       console.log(`Cart found for session token: ${sessionToken}`);
       return existingCart.Item.cart_id.S;

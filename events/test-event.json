@@ -1,8 +1,8 @@
 {
   "headers": {
-    "x-session-token": "e77db74f-d363-411d-a6ab-081d310b89d4"
+    "x-session-token": "e77db74f-d363-411d-a6ab-081d310b89d2"
   },
   "queryStringParameters": {
-    "cust_id": 2
+    "sessionToken": "e77db74f-d363-411d-a6ab-081d310b89d2"
   }
 }

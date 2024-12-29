@@ -168,25 +168,17 @@ resources:
                     - ec2:DescribeDhcpOptions
                     - ec2:DescribeVpcs
                   Resource: "*"
-
+                - Effect: Allow
+                  Action:
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:UpdateItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                  Resource: "*"
                      
 functions:
-  hello-service:
-    handler: dist/hello-service.hello
-    role: foodAppCustomerRole
-    events:
-      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
-          path: /hello
-          method: get
-
-  goodbye-service:
-    handler: dist/goodbye-service.goodbye
-    role: foodAppCustomerRole
-    events:
-      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
-          path: /goodbye
-          method: get
-
   create-cart-service:
     handler: dist/cart-service.createCart
     role: foodAppCustomerRole
@@ -194,6 +186,16 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /create-cart
           method: get
+          cors: true
+
+  create-customer-cart-service:
+    handler: dist/cart-service.createCustomerCart
+    role: foodAppCustomerRole
+    events:
+      - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
+          path: /create-customer-cart
+          method: get
+          cors: true
 
   get-cust-id:
     handler: dist/customer-service.getCustomerId
@@ -202,6 +204,7 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /retrieve-cust-id
           method: get
+          cors: true
 
   get-products:
     handler: dist/product-service.getProducts
@@ -210,6 +213,7 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /get-products
           method: get
+          cors: true
 
   get-customer-cart:
     handler: dist/cart-service.getCustomerCart
@@ -218,6 +222,7 @@ functions:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /get-customer-cart
           method: get
+          cors: true
 
   get-customer-by-id:
     handler: dist/customer-service.retrieveCustomerById
@@ -225,7 +230,8 @@ functions:
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /get-customer-by-id
-          method: get       
+          method: get 
+          cors: true      
 
   create-customer:
     handler: dist/customer-service.createCustomer
@@ -233,4 +239,5 @@ functions:
     events:
       - httpApi:      # Use httpApi for API Gateway v2 (HTTP API)
           path: /create-customer
-          method: post    
+          method: post
+          cors: true    

@@ -15,11 +15,11 @@ export const commonErrors = {
 export const sqlStatements = {
   cartService: {
     CREATE_ANONYMOUS_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (status) VALUES ('active') RETURNING cart_id;`,
-    CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, status) VALUES ($1,'active');`,
+    CREATE_CUSTOMER_CART: `INSERT INTO ${dbConst.CARTS_TABLE} (customer_id, status) VALUES ($1,'active') RETURNING cart_id;`,
     GET_CUSTOMER_CART: `SELECT cart_id from ${dbConst.CARTS_TABLE} WHERE customer_id = $1;`,
   },
   customerService: {
-    GET_CUSTOMER_ID: `SELECT id FROM ${dbConst.CUSTOMERS_TABLE} WHERE name = $1;`,
+    GET_CUSTOMER_ID: `SELECT customer_id FROM ${dbConst.CUSTOMERS_TABLE} WHERE customer_name = $1;`,
     GET_CUSTOMER_BY_ID: `SELECT customer_id, customer_name, email, created_at, cognito_sub, updated_at FROM ${dbConst.CUSTOMERS_TABLE} WHERE cognito_sub=$1;`,
     CREATE_CUSTOMER:
       `INSERT INTO customers (customer_name, cognito_sub, email) ` +

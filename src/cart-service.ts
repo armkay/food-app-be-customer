@@ -17,15 +17,21 @@ export async function createCart(
 
   try {
     // Step 1: Validate the session token
-    const sessionToken = validateSessionToken(event.headers);
+    const sessionToken = validateSessionToken(queryParams.sessionToken);
 
     // Step 2: Check if an existing cart ID is associated with the session token
     const existingCartId = await getCartIdForSession(sessionToken);
 
     if (existingCartId) {
-      console.log(`Existing cart found for session token: ${sessionToken}`);
+      console.log(
+        `Existing cart found for session token: ${JSON.stringify(sessionToken)}`
+      );
       return {
         statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        isBase64Encoded: false,
         body: JSON.stringify({ cartId: existingCartId }),
       };
     }
@@ -33,15 +39,18 @@ export async function createCart(
     console.log(
       `Query Params : ${JSON.stringify(event.queryStringParameters)}`
     );
-
-    // Step 3: Create a new cart (anonymous or customer)
-    const cartId = queryParams?.customerId
-      ? await createCustomerCart(queryParams.customerId, dal)
-      : await createAnonymousCart(sessionToken, dal);
-
+    const customer_id = queryParams.customer_id;
+    let cartId;
+    if (customer_id) {
+      cartId = await createCustomerCart(sessionToken, customer_id, dal);
+    } else {
+      cartId = await createAnonymousCart(sessionToken, dal);
+    }
     return {
       statusCode: 200,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
       isBase64Encoded: false,
       body: JSON.stringify({ cartId }),
     };
@@ -49,6 +58,10 @@ export async function createCart(
     console.error("Error processing cart creation:", error);
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+      isBase64Encoded: false,
       body: JSON.stringify({ error: "Internal Server Error" }),
     };
   }
@@ -65,10 +78,12 @@ async function createAnonymousCart(
 }
 
 async function createCustomerCart(
+  sessionToken: string,
   customerId: string,
   dal: CartDal
 ): Promise<string> {
   const newCartId = await dal.createCustomerCart(customerId);
+  await createSessionCartMapping(sessionToken, newCartId);
   console.log(
     `Customer cart created with ID: ${newCartId} for customerId: ${customerId}`
   );
@@ -102,3 +117,32 @@ export async function getCustomerCart(
     body: `${JSON.stringify(responseDal)}`,
   };
 }
+
+// export async function createCustomerCart(
+//   event: any,
+//   _context: Context,
+//   _callback: Callback
+// ): Promise<any> {
+//   const dal = new CartDal();
+//   let responseDal: any;
+//   let custId: string;
+
+//   const queryParams = event?.queryStringParameters;
+//   console.log(`Query Params : ${JSON.stringify(event)}`);
+//   if (queryParams.customer_id) {
+//     responseDal = await dal.createCustomerCart(queryParams.customer_id);
+//     console.log(
+//       `Customer cart created with ID: ${responseDal} for customerId: ${queryParams.customer_id}`
+//     );
+//   } else {
+//     console.log(`Could Not Create Customer Cart`);
+//     responseDal = { cust_id: queryParams.customer_id, cart_id: "NO CART" };
+//   }
+
+//   return {
+//     statusCode: 200,
+//     headers: { "Access-Control-Allow-Origin": "*" },
+//     isBase64Encoded: false,
+//     body: `${JSON.stringify(responseDal)}`,
+//   };
+// }
